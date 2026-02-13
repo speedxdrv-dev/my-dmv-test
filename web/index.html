@@ -26,6 +26,11 @@
   <title>2026 加州 DMV 中文模拟考试 - 最新官方题库真题刷题网</title>
   <link rel="manifest" href="manifest.json">
 
+  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+  <script>
+    var vConsole = new window.VConsole();
+  </script>
+
   <script>
     // The value below is injected by flutter build, do not touch.
     const serviceWorkerVersion = null;
@@ -40,16 +45,21 @@
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   <script>
+    // 1. 彻底禁用 Service Worker（它是微信蓝屏的常见诱因）
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+
+    // 2. 强制初始化引擎
     window.addEventListener('load', function(ev) {
-      // 强制锁定 html 渲染器，彻底解决微信/移动端蓝屏问题
       _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine({
-            renderer: "html", // 关键：在这里强制指定，不再依赖编译参数
-            useColorEmoji: true
+            renderer: "html", // 锁定 HTML 渲染
           }).then(function(appRunner) {
             appRunner.runApp();
           });

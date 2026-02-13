@@ -45,22 +45,22 @@
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   <script>
-    // 1. 强制在全局环境锁定 HTML 渲染器标签
+    // 1. 在引擎启动前，强制设置全局渲染标志
     window.flutterWebRenderer = "html";
 
-    window.addEventListener('load', function(ev) {
-      // 2. 清理 Service Worker，防止旧的 WASM 逻辑被缓存
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          for (let reg of regs) reg.unregister();
-        });
-      }
+    // 2. 移除可能导致冲突的 Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        for (var reg of regs) reg.unregister();
+      });
+    }
 
-      // 3. 极速启动：跳过所有自动检测，直奔 HTML 模式
+    window.addEventListener('load', function(ev) {
       _flutter.loader.loadEntrypoint({
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine({
-            renderer: "html"
+            // 3. 再次强制锁定 HTML 渲染器
+            renderer: "html",
           }).then(function(appRunner) {
             appRunner.runApp();
           });

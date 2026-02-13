@@ -41,13 +41,16 @@
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
+      // 强制在微信等移动端环境使用 HTML 渲染
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
+          engineInitializer.initializeEngine({
+            renderer: "html", // 这里的配置非常关键
+            useColorEmoji: true
+          }).then(function(appRunner) {
             document.getElementById('flutter-loading')?.remove();
             appRunner.runApp();
           });

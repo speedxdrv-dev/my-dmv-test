@@ -27,8 +27,13 @@ class _PaymentDialogState extends State<PaymentDialog>
     with TickerProviderStateMixin {
   final _codeController = TextEditingController();
   final _codeFocusNode = FocusNode();
+  final _accountNameController = TextEditingController();
   bool _redeemLoading = false;
   bool _showPaymentArea = false;
+  bool _isVip = false;
+  bool _hasPendingRequest = false;
+  bool _vipCheckLoading = true;
+  bool _vipRequestLoading = false;
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
   late AnimationController _pulseController;
@@ -62,6 +67,7 @@ class _PaymentDialogState extends State<PaymentDialog>
   @override
   void initState() {
     super.initState();
+    _checkVipStatus();
     _scaleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 280),
@@ -86,7 +92,86 @@ class _PaymentDialogState extends State<PaymentDialog>
     _pulseController.dispose();
     _codeController.dispose();
     _codeFocusNode.dispose();
+    _accountNameController.dispose();
     super.dispose();
+  }
+
+  /// 检查 profiles.is_vip 与 vip_requests 的 pending 状态
+  Future<void> _checkVipStatus() async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null) {
+      if (mounted) setState(() => _vipCheckLoading = false);
+      return;
+    }
+    try {
+      // profiles 主键为 id，vip_requests 关联列为 user_id
+      final profileRes = await supabase
+          .from('profiles')
+          .select('is_vip')
+          .eq('id', uid)
+          .maybeSingle();
+      final isVip = profileRes?['is_vip'] == true || profileRes?['is_vip'] == 'true';
+
+      final pendingRes = await supabase
+          .from('vip_requests')
+          .select('id')
+          .eq('user_id', uid)
+          .eq('status', 'pending')
+          .maybeSingle();
+
+      if (mounted) {
+        setState(() {
+          _isVip = isVip;
+          _hasPendingRequest = pendingRes != null;
+          _vipCheckLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _vipCheckLoading = false);
+    }
+  }
+
+  Future<void> _submitVipRequest() async {
+    final accountName = _accountNameController.text.trim();
+    if (accountName.isEmpty) return;
+
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null) {
+      if (mounted) {
+        context.showSnackBar(
+          message: _t('请先登录'),
+          background: Colors.red,
+          foreground: Colors.white,
+        );
+      }
+      return;
+    }
+
+    setState(() => _vipRequestLoading = true);
+    try {
+      await supabase.from('vip_requests').insert({
+        'user_id': uid,
+        'account_name': accountName,
+        'status': 'pending',
+      });
+      if (!mounted) return;
+      setState(() => _vipRequestLoading = false);
+      context.showSnackBar(
+        message: _t('申请已提交，请等待管理员审核'),
+        background: AppColors.green,
+        foreground: Colors.white,
+      );
+      await _checkVipStatus();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _vipRequestLoading = false);
+        context.showSnackBar(
+          message: _t('提交失败，请重试'),
+          background: Colors.red,
+          foreground: Colors.white,
+        );
+      }
+    }
   }
 
   void _copyToClipboard(String text, String label) {
@@ -276,61 +361,83 @@ class _PaymentDialogState extends State<PaymentDialog>
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // 第一通道：联系客服/微信支付解锁
-                        SizedBox(
-                          height: 52,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              gradient: _ctaGradient,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF1565C0).withOpacity(0.35),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: _togglePaymentArea,
+                        // 状态 A: VIP | 状态 B: 申请中 | 状态 C: 未购买
+                        if (_vipCheckLoading)
+                          const Padding(
+                            padding: EdgeInsets.all(24),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        else if (_isVip)
+                          _buildStatusCard(
+                            theme,
+                            icon: Icons.check_circle,
+                            text: _t('您已是 VIP 会员，享有全库题库权限'),
+                            color: AppColors.green,
+                          )
+                        else if (_hasPendingRequest)
+                          _buildStatusCard(
+                            theme,
+                            icon: Icons.hourglass_empty,
+                            text: _t('申请审核中，请耐心等待管理员（胡老板）核对'),
+                            color: Colors.orange.shade700,
+                          )
+                        else ...[
+                          // 第一通道：联系客服/微信支付解锁
+                          SizedBox(
+                            height: 52,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: _ctaGradient,
                                 borderRadius: BorderRadius.circular(16),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      AnimatedBuilder(
-                                        animation: _pulseAnimation,
-                                        builder: (_, child) => Transform.scale(
-                                          scale: _showPaymentArea ? 1.0 : _pulseAnimation.value,
-                                          child: Icon(Icons.chat, color: Colors.white, size: 22),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF1565C0).withOpacity(0.35),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _togglePaymentArea,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        AnimatedBuilder(
+                                          animation: _pulseAnimation,
+                                          builder: (_, child) => Transform.scale(
+                                            scale: _showPaymentArea ? 1.0 : _pulseAnimation.value,
+                                            child: Icon(Icons.chat, color: Colors.white, size: 22),
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        _t('联系客服/微信支付解锁'),
-                                        style: theme.textTheme.titleMedium?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          _t('联系客服/微信支付解锁'),
+                                          style: theme.textTheme.titleMedium?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        // 展开的支付区域（微信/ Zelle）
-                        AnimatedCrossFade(
-                          firstChild: const SizedBox.shrink(),
-                          secondChild: _buildPaymentArea(theme, colorScheme),
-                          crossFadeState: _showPaymentArea
-                              ? CrossFadeState.showSecond
-                              : CrossFadeState.showFirst,
-                          duration: const Duration(milliseconds: 250),
-                        ),
+                          // 展开的支付区域（微信/ Zelle + 提交激活申请）
+                          AnimatedCrossFade(
+                            firstChild: const SizedBox.shrink(),
+                            secondChild: _buildPaymentArea(theme, colorScheme),
+                            crossFadeState: _showPaymentArea
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                            duration: const Duration(milliseconds: 250),
+                          ),
+                        ],
                         const SizedBox(height: 20),
                         // 视觉分割
                         Row(
@@ -560,8 +667,100 @@ class _PaymentDialogState extends State<PaymentDialog>
                 ),
               ],
             ),
+            // 提交激活申请
+            const SizedBox(height: 20),
+            Divider(color: colorScheme.outlineVariant.withOpacity(0.5)),
+            const SizedBox(height: 12),
+            Text(
+              _t('提交激活申请'),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _accountNameController,
+              enabled: !_hasPendingRequest,
+              style: theme.textTheme.bodyMedium,
+              decoration: InputDecoration(
+                hintText: _t('请输入您的 Zelle 姓名或转账备注，以便我们对账'),
+                hintStyle: TextStyle(
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+                filled: true,
+                fillColor: colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 44,
+              child: FilledButton(
+                onPressed: _hasPendingRequest || _vipRequestLoading ||
+                        _accountNameController.text.trim().isEmpty
+                    ? null
+                    : _submitVipRequest,
+                style: FilledButton.styleFrom(
+                  backgroundColor: _hasPendingRequest
+                      ? colorScheme.outlineVariant
+                      : colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _vipRequestLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        _hasPendingRequest ? _t('审核中') : _t('提交申请'),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatusCard(ThemeData theme, {required IconData icon, required String text, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 26),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
       ),
     );
   }

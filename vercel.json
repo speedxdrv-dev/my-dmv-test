@@ -1,6 +1,5 @@
 {
-  "installCommand": "bash scripts/vercel-build.sh",
-  "buildCommand": "./_flutter/bin/flutter build web --release --base-href=/ --pwa-strategy none --no-source-maps",
-  "outputDirectory": "build/web",
-  "rewrites": [{"source": "/(.*)", "destination": "/index.html"}]
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

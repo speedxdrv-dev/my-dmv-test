@@ -177,8 +177,25 @@ class _ProfilePageState extends State<ProfilePage> {
                     _versionTapCount++;
                     if (_versionTapCount >= 5) {
                       _versionTapCount = 0;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('身份验证成功，欢迎 Boss！'),
+                          backgroundColor: Colors.green,
+                          duration: const Duration(milliseconds: 500),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
                       context.router.push(const AdminReviewRoute());
                     } else {
+                      if (_versionTapCount >= 3) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('再点 ${5 - _versionTapCount} 次进入管理模式'),
+                            duration: const Duration(milliseconds: 500),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
                       _versionTapResetTimer = Timer(const Duration(seconds: 2), () {
                         if (mounted) setState(() => _versionTapCount = 0);
                       });

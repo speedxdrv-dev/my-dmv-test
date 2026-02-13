@@ -47,7 +47,7 @@ class AppRouter extends _$AppRouter {
             ),
             AutoRoute(
               path: 'home',
-              page: HomePageRoute.page,
+              page: HomeRoute.page,
             ),
             AutoRoute(
               path: 'supabase-quiz',

@@ -41,7 +41,7 @@ class _PaymentDialogState extends State<PaymentDialog>
 
   static const String _zelleRecipient = 'ZyLand Education';
   static const String _zelleAccount = '840-668-0660';
-  static const String _wechatId = 'ZyLand_Edu';
+  static const String _wechatId = 'zytop_2026';
 
   static const _brandGradient = LinearGradient(
     begin: Alignment.topLeft,

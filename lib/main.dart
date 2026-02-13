@@ -149,22 +149,8 @@ class _HomeState extends State<Home> {
       SupabaseConfig.isReachable = true;
     }
     if (!mounted) return;
-    final introSeen = await IntroPreference.loadIntroSeen();
-    if (!mounted) return;
-    if (!introSeen) {
-      appRouter.replaceAll([const HomeRoute(), const IntroRoute()]);
-      return;
-    }
-    final user = supabase.auth.currentUser;
-    if (user == null) {
-      Provider.of<UserManager>(context, listen: false).clear();
-      appRouter.replaceAll([const HomeRoute(), const AuthRoute()]);
-    } else {
-      await Provider.of<UserManager>(context, listen: false)
-          .loadVipStatus(user.id);
-      if (!mounted) return;
-      appRouter.replaceAll([const HomeRoute()]);
-    }
+    // 所有用户（包括已登录）加载时先进入介绍页，点击「开始」后再跳转
+    appRouter.replaceAll([const HomeRoute(), const IntroRoute()]);
   }
 
   @override

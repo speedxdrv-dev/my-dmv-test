@@ -30,7 +30,7 @@ jobs:
         run: |
           REPO_NAME="${{ github.event.repository.name }}"
           echo "Building with base-href=/${REPO_NAME}/"
-          flutter build web --release --base-href=/${REPO_NAME}/ --pwa-strategy none --no-source-maps
+          flutter build web --release --base-href=/${REPO_NAME}/ --pwa-strategy none --no-source-maps --web-renderer html
 
       - name: Verify base href
         run: |

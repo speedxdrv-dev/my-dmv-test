@@ -41,15 +41,17 @@
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   <script>
     window.addEventListener('load', function(ev) {
-      // 强制在微信等移动端环境使用 HTML 渲染
+      // 检查是否在微信环境下
+      var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine({
-            renderer: "html", // 这里的配置非常关键
-            useColorEmoji: true
+            // 微信环境下强制 HTML 渲染，其他环境自动
+            renderer: isWeChat ? "html" : "auto",
           }).then(function(appRunner) {
             document.getElementById('flutter-loading')?.remove();
             appRunner.runApp();

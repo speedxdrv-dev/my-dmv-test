@@ -41,8 +41,8 @@
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   <script>
     window.addEventListener('load', function(ev) {
-      // 检查是否在微信环境下
-      var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+      // 强制在微信环境下使用 HTML 模式，避免 CanvasKit 蓝屏
+      var isWechat = /MicroMessenger/i.test(navigator.userAgent);
 
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
@@ -50,10 +50,8 @@
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine({
-            // 微信环境下强制 HTML 渲染，其他环境自动
-            renderer: isWeChat ? "html" : "auto",
+            renderer: isWechat ? "html" : "auto", // 微信必选 html
           }).then(function(appRunner) {
-            document.getElementById('flutter-loading')?.remove();
             appRunner.runApp();
           });
         }

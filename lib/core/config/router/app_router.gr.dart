@@ -11,10 +11,16 @@ part of 'app_router.dart';
 
 abstract class _$AppRouter extends RootStackRouter {
   // ignore: unused_element
-  _$AppRouter();
+  _$AppRouter({super.navigatorKey});
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    AdminReviewRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const AdminReviewPage(),
+      );
+    },
     AuthRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -45,12 +51,6 @@ abstract class _$AppRouter extends RootStackRouter {
       );
     },
     HomeRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const Home(),
-      );
-    },
-    HomePageRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const HomePage(),
@@ -99,9 +99,11 @@ abstract class _$AppRouter extends RootStackRouter {
         routeData: routeData,
         child: SupabaseQuizPage(
           key: args.key,
+          chapterId: args.chapterId,
           categories: args.categories,
           mistakeIds: args.mistakeIds,
           title: args.title,
+          chapterTitle: args.chapterTitle,
           onBack: args.onBack,
           onMistakesEmpty: args.onMistakesEmpty,
           isTraditional: args.isTraditional,
@@ -115,6 +117,20 @@ abstract class _$AppRouter extends RootStackRouter {
       );
     },
   };
+}
+
+/// generated route for
+/// [AdminReviewPage]
+class AdminReviewRoute extends PageRouteInfo<void> {
+  const AdminReviewRoute({List<PageRouteInfo>? children})
+      : super(
+          AdminReviewRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'AdminReviewRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
@@ -203,7 +219,7 @@ class HandbookListRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [Home]
+/// [HomePage]
 class HomeRoute extends PageRouteInfo<void> {
   const HomeRoute({List<PageRouteInfo>? children})
       : super(
@@ -212,20 +228,6 @@ class HomeRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'HomeRoute';
-
-  static const PageInfo<void> page = PageInfo<void>(name);
-}
-
-/// generated route for
-/// [HomePage]
-class HomePageRoute extends PageRouteInfo<void> {
-  const HomePageRoute({List<PageRouteInfo>? children})
-      : super(
-          HomePageRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'HomePageRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
@@ -319,9 +321,11 @@ class SkeletonRoute extends PageRouteInfo<void> {
 class SupabaseQuizRoute extends PageRouteInfo<SupabaseQuizRouteArgs> {
   SupabaseQuizRoute({
     Key? key,
+    int? chapterId,
     List<String>? categories,
     List<String>? mistakeIds,
     String? title,
+    String? chapterTitle,
     void Function()? onBack,
     void Function()? onMistakesEmpty,
     bool isTraditional = false,
@@ -330,9 +334,11 @@ class SupabaseQuizRoute extends PageRouteInfo<SupabaseQuizRouteArgs> {
           SupabaseQuizRoute.name,
           args: SupabaseQuizRouteArgs(
             key: key,
+            chapterId: chapterId,
             categories: categories,
             mistakeIds: mistakeIds,
             title: title,
+            chapterTitle: chapterTitle,
             onBack: onBack,
             onMistakesEmpty: onMistakesEmpty,
             isTraditional: isTraditional,
@@ -349,9 +355,11 @@ class SupabaseQuizRoute extends PageRouteInfo<SupabaseQuizRouteArgs> {
 class SupabaseQuizRouteArgs {
   const SupabaseQuizRouteArgs({
     this.key,
+    this.chapterId,
     this.categories,
     this.mistakeIds,
     this.title,
+    this.chapterTitle,
     this.onBack,
     this.onMistakesEmpty,
     this.isTraditional = false,
@@ -359,11 +367,15 @@ class SupabaseQuizRouteArgs {
 
   final Key? key;
 
+  final int? chapterId;
+
   final List<String>? categories;
 
   final List<String>? mistakeIds;
 
   final String? title;
+
+  final String? chapterTitle;
 
   final void Function()? onBack;
 
@@ -373,7 +385,7 @@ class SupabaseQuizRouteArgs {
 
   @override
   String toString() {
-    return 'SupabaseQuizRouteArgs{key: $key, categories: $categories, mistakeIds: $mistakeIds, title: $title, onBack: $onBack, onMistakesEmpty: $onMistakesEmpty, isTraditional: $isTraditional}';
+    return 'SupabaseQuizRouteArgs{key: $key, chapterId: $chapterId, categories: $categories, mistakeIds: $mistakeIds, title: $title, chapterTitle: $chapterTitle, onBack: $onBack, onMistakesEmpty: $onMistakesEmpty, isTraditional: $isTraditional}';
   }
 }
 

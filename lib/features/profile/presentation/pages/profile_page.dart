@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../core/config/router/app_router.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../about/data/app_package_info.dart';
 import '../../../../core/utils/constants/numbers.dart';
 import '../../../../core/utils/extensions/snack_bar_extension.dart';
 import '../../../../core/utils/functions/calculate_max_width.dart';
@@ -25,6 +28,14 @@ class ProfilePage extends StatefulHookWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
+  int _versionTapCount = 0;
+  Timer? _versionTapResetTimer;
+
+  @override
+  void dispose() {
+    _versionTapResetTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +167,30 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: kHugePadding),
+              GestureDetector(
+                onTap: () {
+                  _versionTapResetTimer?.cancel();
+                  setState(() {
+                    _versionTapCount++;
+                    if (_versionTapCount >= 5) {
+                      _versionTapCount = 0;
+                      context.router.push(const AdminReviewRoute());
+                    } else {
+                      _versionTapResetTimer = Timer(const Duration(seconds: 2), () {
+                        if (mounted) setState(() => _versionTapCount = 0);
+                      });
+                    }
+                  });
+                },
+                child: Text(
+                  'Version ${AppPackageInfo().packageInfo.version}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],

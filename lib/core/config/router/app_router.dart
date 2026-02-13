@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../../features/about/presentation/pages/release_page.dart';
+import '../../../features/admin/presentation/pages/admin_review_page.dart';
 import '../../../features/auth/presentation/pages/auth_page.dart';
 import '../../../features/demo/presentation/pages/demo_home_page.dart';
 import '../../../features/handbook/presentation/pages/handbook_detail_page.dart';
@@ -85,6 +86,10 @@ class AppRouter extends _$AppRouter {
               path: 'handbook/detail',
               fullscreenDialog: true,
               page: HandbookDetailRoute.page,
+            ),
+            AutoRoute(
+              path: 'admin-review',
+              page: AdminReviewRoute.page,
             ),
           ],
         ),

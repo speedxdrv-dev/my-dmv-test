@@ -19,7 +19,7 @@ class ReleasePageAppBar extends StatelessWidget implements PreferredSizeWidget {
           final result = await context.maybePop();
 
           if (!result && context.mounted) {
-            context.pushRoute(const HomeRoute());
+            appRouter.replaceAll([const HomeRoute(), const HomePageRoute()]);
           }
         },
       ),

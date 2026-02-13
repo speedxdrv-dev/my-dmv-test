@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/app_shell.dart';
 import '../../../features/about/presentation/pages/release_page.dart';
 import '../../../features/admin/presentation/pages/admin_review_page.dart';
 import '../../../features/auth/presentation/pages/auth_page.dart';
@@ -46,7 +47,7 @@ class AppRouter extends _$AppRouter {
             ),
             AutoRoute(
               path: 'home',
-              page: HomeRoute.page,
+              page: HomePageRoute.page,
             ),
             AutoRoute(
               path: 'supabase-quiz',

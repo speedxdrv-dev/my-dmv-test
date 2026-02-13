@@ -16,7 +16,7 @@ class IntroPage extends StatelessWidget {
     await IntroPreference.saveIntroSeen(true);
     if (!context.mounted) return;
     if (supabase.auth.currentUser != null) {
-      appRouter.replaceAll([const HomeRoute()]);
+      appRouter.replaceAll([const HomeRoute(), const HomePageRoute()]);
     } else {
       appRouter.replaceAll([const HomeRoute(), const AuthRoute()]);
     }

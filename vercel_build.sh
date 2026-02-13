@@ -1,15 +1,13 @@
 #!/bin/bash
-set -e # 遇到错误立刻停止
-set -x # 打印每一行执行的命令，方便看日志
+# 1. 打印当前目录，确认文件位置
+pwd
+ls -l vercel_build.sh
 
-# 1. 检查并清理旧目录
-rm -rf f
-
-# 2. 克隆 Flutter (使用最快的镜像和深度)
+# 2. 开始安装 Flutter
 git clone https://github.com/flutter/flutter.git -b stable --depth 1 f
 
 # 3. 环境变量注入
-printf "SUPABASE_URL=$SUPABASE_URL\nSUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" > .env
+printf "SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s" "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > .env
 
-# 4. 显式指定路径运行构建
-./f/bin/flutter build web --release --web-renderer html
+# 4. 执行构建 (暂时去掉 --web-renderer html 看看能不能跑通)
+./f/bin/flutter build web --release

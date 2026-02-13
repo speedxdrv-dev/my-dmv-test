@@ -80,7 +80,7 @@ class IntroPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '全加州最全，最真考题',
+                            '全加州最全，最真考题。包含 drive.zylandedu.com 核心题库同步更新',
                             textAlign: TextAlign.center,
                             style: notoSansTcWithFallback(
                               textStyle: const TextStyle(

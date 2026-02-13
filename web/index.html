@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Flutter 构建时会替换 $FLUTTER_BASE_HREF，本地用 /，部署时加 --base-href=/supaquiz/ -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="全加州最全、最真考题。ZyLand 2026最新规范加州DMV中文题库，助你一把过关。.">
+
+  <!-- PWA / 移动端 Web App 支持 -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Zyland加州驾考通 2026">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon (与 assets/logo.png 同步，构建前可执行: Copy-Item assets\logo.png web\favicon.png -Force) -->
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <title>Zyland加州驾考通 2026</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    const serviceWorkerVersion = null;
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <script>
+    window.addEventListener('load', function(ev) {
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

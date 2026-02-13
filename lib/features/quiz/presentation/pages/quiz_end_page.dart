@@ -1,0 +1,108 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/config/router/app_router.dart';
+import '../../../../core/config/supabase/supabase_config.dart';
+import '../../../../core/utils/constants/colors.dart';
+import '../../../../core/utils/constants/numbers.dart';
+import '../../../../core/utils/functions/calculate_max_width.dart';
+import '../../../../core/widgets/custom_elevated_button.dart';
+import '../provider/quiz_provider.dart';
+import '../widgets/done_image.dart';
+import '../widgets/result_box.dart';
+
+@RoutePage()
+class QuizEndPage extends StatelessWidget {
+  const QuizEndPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final quizProvider = context.watch<QuizProvider>();
+
+    return Scaffold(
+      body: Center(
+        child: Container(
+          width: calculateMaxWidth(context),
+          padding: const EdgeInsets.symmetric(horizontal: kLargePadding),
+          child: Column(
+            children: [
+              const Spacer(),
+              const DoneImage(),
+              Padding(
+                padding: const EdgeInsets.all(kDefaultPadding),
+                child: Text(
+                  "You finished ${quizProvider.quizInfo.name == 'Random' ? 'a random' : 'the ${quizProvider.quizInfo.name}'} quiz!",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: kHugePadding,
+                runSpacing: kDefaultPadding,
+                children: [
+                  ResultBox(
+                    value: "${quizProvider.quizInfo.correct}",
+                    title: "Correct",
+                    color: AppColors.blue,
+                  ),
+                  ResultBox(
+                    value: "${quizProvider.quizInfo.incorrect}",
+                    title: "Incorrect",
+                    color: AppColors.red,
+                  ),
+                  ResultBox(
+                    value:
+                        "${quizProvider.quizInfo.time?.elapsed.inMinutes.toString().padLeft(2, '0')}:${quizProvider.quizInfo.time?.elapsed.inSeconds.remainder(60).toString().padLeft(2, '0')}",
+                    title: "Time",
+                    color: AppColors.green,
+                  ),
+                  ResultBox(
+                    value: "${quizProvider.quizInfo.skipped}",
+                    title: "Skipped",
+                    color: AppColors.red,
+                  ),
+                  ResultBox(
+                    value: "${quizProvider.quizInfo.totalPoints}",
+                    title: "Total Points",
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
+              const Spacer(),
+              CustomElevatedButton(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Done",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+                onPressed: () async {
+                  if (SupabaseConfig.isReachable) {
+                    await context.read<QuizProvider>().uploadQuizToDatabase();
+                  }
+
+                  if (context.mounted) {
+                    if (SupabaseConfig.isReachable) {
+                      context.router.push(const SkeletonRoute());
+                    } else {
+                      context.router.replaceAll([
+                        const HomeRoute(),
+                        const DemoHomeRoute(),
+                      ]);
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: kLargeSpacing),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

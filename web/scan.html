@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>扫码进入 - ZyLand 加州驾考通</title>
+  <title>扫码进入 - 加州金牌题库 · ZyLand 驾考通</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -12,74 +12,90 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #0277bd 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #FFC107 0%, #FFB300 25%, #1976D2 75%, #1565C0 100%);
       color: #fff;
       padding: 24px;
     }
     .card {
-      background: rgba(255,255,255,0.95);
+      background: #fff;
       color: #333;
-      border-radius: 20px;
-      padding: 40px;
+      border-radius: 24px;
+      padding: 40px 36px 44px;
       text-align: center;
       max-width: 360px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.2), 0 10px 30px rgba(0,0,0,0.12);
     }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 8px;
-      color: #1a237e;
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0D47A1;
+      line-height: 1.35;
+      margin-bottom: 24px;
+      padding: 0 8px;
     }
     .subtitle {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 28px;
+      font-size: 16px;
+      color: #616161;
+      max-width: 300px;
+      margin: 0 auto 32px;
+      line-height: 1.5;
     }
     .qr-wrap {
       background: #fff;
       padding: 16px;
-      border-radius: 12px;
+      border-radius: 16px;
       display: inline-block;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+      border: 2px solid #FFC107;
     }
     .qr-wrap img {
       display: block;
       width: 220px;
       height: 220px;
     }
+    .guide-text {
+      font-size: 12px;
+      color: #9E9E9E;
+      margin-bottom: 12px;
+    }
     .url {
-      font-size: 14px;
-      color: #0277bd;
+      font-size: 15px;
+      color: #1565C0;
+      font-weight: 600;
       word-break: break-all;
-      margin-bottom: 20px;
+      margin-bottom: 28px;
     }
     .btn {
       display: inline-block;
-      background: linear-gradient(135deg, #1565c0, #42a5f5);
+      background: linear-gradient(135deg, #FFC107 0%, #FFB300 30%, #1976D2 70%, #1565C0 100%);
       color: #fff;
       text-decoration: none;
-      padding: 14px 32px;
-      border-radius: 12px;
+      padding: 18px 48px;
+      border-radius: 999px;
       font-weight: 600;
-      font-size: 16px;
+      font-size: 18px;
+      min-width: 240px;
+      box-shadow: 0 8px 24px rgba(21, 101, 192, 0.35);
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(21, 101, 192, 0.4);
+      box-shadow: 0 12px 32px rgba(21, 101, 192, 0.4);
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>2026 加州 DMV 驾考通</h1>
-    <p class="subtitle">扫码或点击下方按钮进入</p>
+    <h1 class="title">2026 加州驾照笔试<br>「通关神器」</h1>
+    <p class="subtitle">最新官方中文真题 · 手机随时刷 · 助你一次过</p>
     <div class="qr-wrap">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fzylandedu.com&margin=10" alt="扫码进入">
     </div>
+    <p class="guide-text">长按保存图片，分享给好友</p>
     <p class="url">zylandedu.com</p>
-    <a href="https://zylandedu.com" class="btn">立即进入</a>
+    <a href="https://zylandedu.com" class="btn">免费开始刷题</a>
   </div>
 </body>
 </html>

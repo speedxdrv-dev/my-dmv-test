@@ -163,7 +163,7 @@ class _HomeState extends State<Home> {
       await Provider.of<UserManager>(context, listen: false)
           .loadVipStatus(user.id);
       if (!mounted) return;
-      appRouter.replaceAll([const HomeRoute(), const HomePageRoute()]);
+      appRouter.replaceAll([const HomeRoute()]);
     }
   }
 

@@ -29,6 +29,10 @@ class AppRouter extends _$AppRouter {
           initial: true,
           children: [
             AutoRoute(
+              path: '',
+              page: IntroRoute.page,
+            ),
+            AutoRoute(
               path: 'intro',
               page: IntroRoute.page,
             ),
@@ -55,11 +59,11 @@ class AppRouter extends _$AppRouter {
               fullscreenDialog: true,
             ),
             AutoRoute(
-              path: '',
+              path: 'skeleton',
               page: SkeletonRoute.page,
               children: [
                 AutoRoute(
-                  path: 'profile',
+                  path: '',
                   page: ProfileRoute.page,
                   type: const RouteType.custom(),
                 ),

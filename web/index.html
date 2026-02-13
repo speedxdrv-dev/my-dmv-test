@@ -45,21 +45,22 @@
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   <script>
-    // 1. 彻底禁用 Service Worker（它是微信蓝屏的常见诱因）
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
+    // 1. 强制在全局环境锁定 HTML 渲染器标签
+    window.flutterWebRenderer = "html";
 
-    // 2. 强制初始化引擎
     window.addEventListener('load', function(ev) {
+      // 2. 清理 Service Worker，防止旧的 WASM 逻辑被缓存
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (let reg of regs) reg.unregister();
+        });
+      }
+
+      // 3. 极速启动：跳过所有自动检测，直奔 HTML 模式
       _flutter.loader.loadEntrypoint({
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine({
-            renderer: "html", // 锁定 HTML 渲染
+            renderer: "html"
           }).then(function(appRunner) {
             appRunner.runApp();
           });

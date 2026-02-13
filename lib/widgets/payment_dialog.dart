@@ -410,7 +410,7 @@ class _PaymentDialogState extends State<PaymentDialog>
                                           animation: _pulseAnimation,
                                           builder: (_, child) => Transform.scale(
                                             scale: _showPaymentArea ? 1.0 : _pulseAnimation.value,
-                                            child: Icon(Icons.chat, color: Colors.white, size: 22),
+                                            child: const Icon(Icons.chat, color: Colors.white, size: 22),
                                           ),
                                         ),
                                         const SizedBox(width: 8),

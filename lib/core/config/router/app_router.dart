@@ -15,7 +15,6 @@ import '../../../features/quiz/presentation/pages/quiz_end_page.dart';
 import '../../../features/quiz/presentation/pages/quiz_page.dart';
 import '../../../features/skeleton/skeleton.dart';
 import '../../../features/supabase_quiz/presentation/pages/supabase_quiz_page.dart';
-import '../../../main.dart';
 
 part 'app_router.gr.dart';
 

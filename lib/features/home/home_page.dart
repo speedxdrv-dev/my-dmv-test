@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../core/config/router/app_router.dart';
 import '../../../../core/utils/resources/supabase.dart';
@@ -255,8 +254,8 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           child: Row(
                             children: [
-                              Text('✅ ', style: TextStyle(fontSize: 12, color: amber)),
-                              Expanded(child: Text(e.$3, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: amber))),
+                              const Text('✅ ', style: TextStyle(fontSize: 12, color: amber)),
+                              Expanded(child: Text(e.$3, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: amber))),
                             ],
                           ),
                         ),

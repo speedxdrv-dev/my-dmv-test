@@ -378,7 +378,7 @@ class _PaymentDialogState extends State<PaymentDialog>
                           _buildStatusCard(
                             theme,
                             icon: Icons.hourglass_empty,
-                            text: _t('申请审核中，请耐心等待管理员（胡老板）核对'),
+                            text: _t('申请审核中，请耐心等待管理员核对'),
                             color: Colors.orange.shade700,
                           )
                         else ...[

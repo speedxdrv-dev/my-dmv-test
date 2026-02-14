@@ -476,6 +476,17 @@ class _HomePageState extends State<HomePage> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
+            icon: const Icon(Icons.logout_rounded),
+            tooltip: _t('退出登录'),
+            color: Colors.red,
+            onPressed: () async {
+              context.read<UserManager>().clear();
+              await supabase.auth.signOut();
+              if (!context.mounted) return;
+              appRouter.replaceAll([const HomeRoute(), const IntroRoute()]);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline),
             tooltip: _t('关于/介绍'),
             onPressed: () => context.router.push(const IntroRoute()),

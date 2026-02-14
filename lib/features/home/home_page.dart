@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/config/router/app_router.dart';
+import '../auth/presentation/pages/auth_page.dart';
 import '../../../../core/services/logout_service.dart';
 import '../../../../core/user/user_manager.dart';
 import '../../../../core/utils/resources/supabase.dart';
@@ -52,7 +53,7 @@ class _HomePageState extends State<HomePage> {
     _initStreak();
     _checkVipStatus();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkPendingChapterAccess();
+      _checkVipAndShowPaywall();
     });
   }
 
@@ -191,23 +192,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 登录回跳后检查待访问章节（从章节点击跳转登录时设置）
-  Future<void> _checkPendingChapterAccess() async {
+  /// 登录回跳后检查 VIP 并弹出收费窗口（从章节点击跳转登录时设置）
+  Future<void> _checkVipAndShowPaywall() async {
     final userManager = context.read<UserManager>();
     final pending = userManager.consumePendingChapter();
     if (pending == null || !mounted) return;
     final id = pending['id'] as int;
     final type = pending['type'] as String?;
     final title = _t(pending['title'] as String);
+
+    // 刷新用户状态，确保 App 知道用户刚登录完
+    await _refreshUserStatus();
+    if (!mounted) return;
+
     final isVipNow = await _fetchVipStatus();
     if (!mounted) return;
     setState(() => _isVip = isVipNow);
+
     if (!isVipNow) {
-      // 登录回跳后延后两帧弹出，确保路由过渡完成、overlay 已就绪
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _showPurchaseDialog(this.context, pendingChapter: pending);
-        });
+        if (mounted) _showPurchaseDialog(this.context, pendingChapter: pending);
       });
     } else {
       if (type == 'simulation') {
@@ -217,6 +221,14 @@ class _HomePageState extends State<HomePage> {
       } else {
         _openQuizWithChapter(id, title);
       }
+    }
+  }
+
+  /// 刷新用户状态（VIP 等），登录回跳后调用
+  Future<void> _refreshUserStatus() async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid != null) {
+      await context.read<UserManager>().loadVipStatus(uid);
     }
   }
 
@@ -246,7 +258,14 @@ class _HomePageState extends State<HomePage> {
     if (needLogin) {
       userManager.setPendingChapter(chapter);
       if (!context.mounted) return;
-      appRouter.replaceAll([const HomeRoute(), const AuthRoute()]);
+      // 使用 Navigator.push 确保能可靠接收 LoginPage 返回的布尔值
+      final loginSuccess = await Navigator.of(context, rootNavigator: true).push<bool>(
+        MaterialPageRoute(builder: (_) => const AuthPage()),
+      );
+      if (!mounted) return;
+      if (loginSuccess == true) {
+        await _checkVipAndShowPaywall();
+      }
       return;
     }
 

@@ -57,8 +57,8 @@ class _PaymentDialogState extends State<PaymentDialog>
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF1565C0),
-      Color(0xFF42A5F5),
+      Color(0xFFD4A017),
+      Color(0xFFF5C842),
     ],
   );
 
@@ -303,7 +303,7 @@ class _PaymentDialogState extends State<PaymentDialog>
                       children: [
                         // 主标题
                         Text(
-                          _t('解锁 ZyLand 驾考通全能包'),
+                          _t('加州 2026 驾考通 · 全库解锁'),
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.onSurface,
@@ -311,10 +311,29 @@ class _PaymentDialogState extends State<PaymentDialog>
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 6),
-                        // 副标题
+                        const SizedBox(height: 12),
+                        // 文案
                         Text(
-                          _t('加入 500+ 位已过关学员的行列'),
+                          _t('🎉 恭喜完成前三章试炼！'),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _t('剩余 500+ 真题、全真模拟考、错题集已为您准备就绪。'),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _t('今日加入，享洛杉矶华人社群专属优惠价。'),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                             fontSize: 14,
@@ -387,7 +406,7 @@ class _PaymentDialogState extends State<PaymentDialog>
                             color: Colors.orange.shade700,
                           )
                         else ...[
-                          // 第一通道：联系客服/微信支付解锁
+                          // 第一通道：立即开启通关之路
                           SizedBox(
                             height: 52,
                             child: DecoratedBox(
@@ -396,7 +415,7 @@ class _PaymentDialogState extends State<PaymentDialog>
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF1565C0).withOpacity(0.35),
+                                    color: const Color(0xFFD4A017).withOpacity(0.4),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -415,12 +434,12 @@ class _PaymentDialogState extends State<PaymentDialog>
                                           animation: _pulseAnimation,
                                           builder: (_, child) => Transform.scale(
                                             scale: _showPaymentArea ? 1.0 : _pulseAnimation.value,
-                                            child: const Icon(Icons.chat, color: Colors.white, size: 22),
+                                            child: Icon(Icons.rocket_launch, color: Colors.white.withOpacity(0.95), size: 22),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          _t('联系客服/微信支付解锁'),
+                                          _t('立即开启通关之路'),
                                           style: theme.textTheme.titleMedium?.copyWith(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w600,

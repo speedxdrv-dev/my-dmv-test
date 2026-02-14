@@ -33,6 +33,9 @@ class UserManager extends ChangeNotifier {
   /// 登录回跳后待访问的章节（从章节点击跳转登录时设置）
   Map<String, dynamic>? _pendingChapter;
 
+  /// 是否有待访问章节（用于判断是否由 push 进入登录页，避免 app_shell replaceAll 覆盖）
+  bool get hasPendingChapter => _pendingChapter != null;
+
   void setPendingChapter(Map<String, dynamic> chapter) {
     _pendingChapter = chapter;
     notifyListeners();

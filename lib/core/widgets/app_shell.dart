@@ -56,11 +56,15 @@ class _AppShellState extends State<AppShell> {
     if (!SupabaseConfig.isReachable) SupabaseConfig.isReachable = true;
     if (event == AuthChangeEvent.signedIn) {
       final user = supabase.auth.currentUser;
+      final userManager = context.read<UserManager>();
       if (user != null) {
-        context.read<UserManager>().clearForceLogin();
-        await context.read<UserManager>().loadVipStatus(user.id);
+        userManager.clearForceLogin();
+        await userManager.loadVipStatus(user.id);
       }
       if (!mounted) return;
+      if (userManager.hasPendingChapter) {
+        return;
+      }
       appRouter.replaceAll([const HomeRoute(), const HomePageRoute()]);
     } else {
       // 退出登录后进入介绍页，用户点击「开始我的通关之旅」进入答题目录

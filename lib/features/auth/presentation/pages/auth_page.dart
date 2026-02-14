@@ -282,6 +282,9 @@ class _AuthPageState extends State<AuthPage> {
                                           username: phone,
                                           context: context,
                                         );
+                                        if (mounted) {
+                                          Navigator.of(context).pop(true);
+                                        }
                                       } finally {
                                         if (mounted) isLoading.value = false;
                                       }

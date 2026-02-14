@@ -7,7 +7,6 @@ import '../../../../core/config/themes/app_theme.dart';
 import '../../../../core/preferences/chinese_preference.dart';
 import '../../../../core/preferences/intro_preference.dart';
 import '../../../../core/utils/chinese_converter.dart';
-import '../../../../core/utils/resources/supabase.dart';
 import '../../../../widgets/advantage_comparison_card.dart';
 
 @RoutePage()
@@ -39,11 +38,8 @@ class _IntroPageState extends State<IntroPage> {
   void _onStart(BuildContext context) async {
     await IntroPreference.saveIntroSeen(true);
     if (!context.mounted) return;
-    if (supabase.auth.currentUser != null) {
-      appRouter.replaceAll([const HomeRoute(), const HomePageRoute()]);
-    } else {
-      appRouter.replaceAll([const HomeRoute(), const AuthRoute()]);
-    }
+    // 取消强制登录，直接进入答题目录页
+    appRouter.replaceAll([const HomeRoute(), const HomePageRoute()]);
   }
 
   @override

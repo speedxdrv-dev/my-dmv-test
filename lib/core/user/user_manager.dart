@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../utils/resources/supabase.dart';
 
-/// 全局用户状态管理，存储 VIP 等信息
+/// 全局用户状态管理，存储 VIP、待访问章节等信息
 class UserManager extends ChangeNotifier {
   UserManager._();
 
@@ -15,6 +15,21 @@ class UserManager extends ChangeNotifier {
   bool? _isVip;
 
   bool? get isVip => _isVip;
+
+  /// 登录回跳后待访问的章节（从章节点击跳转登录时设置）
+  Map<String, dynamic>? _pendingChapter;
+
+  void setPendingChapter(Map<String, dynamic> chapter) {
+    _pendingChapter = chapter;
+    notifyListeners();
+  }
+
+  Map<String, dynamic>? consumePendingChapter() {
+    final p = _pendingChapter;
+    _pendingChapter = null;
+    notifyListeners();
+    return p;
+  }
 
   /// 严格解析 is_vip：仅明确为 true 时才算 VIP
   static bool _parseIsVip(dynamic raw) {
@@ -45,6 +60,7 @@ class UserManager extends ChangeNotifier {
   /// 登出时清空
   void clear() {
     _isVip = null;
+    _pendingChapter = null;
     notifyListeners();
   }
 }

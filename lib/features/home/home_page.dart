@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/config/router/app_router.dart';
+import '../../../../core/user/user_manager.dart';
 import '../../../../core/utils/resources/supabase.dart';
 import '../../widgets/payment_dialog.dart';
 import 'dart:async';
@@ -48,6 +50,9 @@ class _HomePageState extends State<HomePage> {
     _refreshMistakeCount();
     _initStreak();
     _checkVipStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPendingChapterAccess();
+    });
   }
 
   /// 从 profiles 表获取当前用户的 VIP 状态
@@ -156,7 +161,7 @@ class _HomePageState extends State<HomePage> {
     setState(() => _showSimulationExam = false);
   }
 
-  void _showPurchaseDialog(BuildContext context) {
+  void _showPurchaseDialog(BuildContext context, {Map<String, dynamic>? pendingChapter}) {
     final isTraditional = _isTraditional;
     showDialog<void>(
       context: context,
@@ -165,9 +170,46 @@ class _HomePageState extends State<HomePage> {
         onRedeemed: () async {
           await _checkVipStatus();
           if (context.mounted) Navigator.of(context).pop();
+          // 交费验证成功后，立即更新 VIP 并开启对应章节
+          if (pendingChapter != null && mounted) {
+            final id = pendingChapter['id'] as int;
+            final type = pendingChapter['type'] as String?;
+            final title = _t(pendingChapter['title'] as String);
+            if (type == 'simulation') {
+              _openSimulationExam();
+            } else if (type == 'hardest') {
+              _openQuizWithChapter(id, title);
+            } else {
+              _openQuizWithChapter(id, title);
+            }
+          }
         },
       ),
     );
+  }
+
+  /// 登录回跳后检查待访问章节（从章节点击跳转登录时设置）
+  Future<void> _checkPendingChapterAccess() async {
+    final userManager = context.read<UserManager>();
+    final pending = userManager.consumePendingChapter();
+    if (pending == null || !mounted) return;
+    final id = pending['id'] as int;
+    final type = pending['type'] as String?;
+    final title = _t(pending['title'] as String);
+    final isVipNow = await _fetchVipStatus();
+    if (!mounted) return;
+    setState(() => _isVip = isVipNow);
+    if (!isVipNow) {
+      _showPurchaseDialog(context, pendingChapter: pending);
+    } else {
+      if (type == 'simulation') {
+        _openSimulationExam();
+      } else if (type == 'hardest') {
+        _openQuizWithChapter(id, title);
+      } else {
+        _openQuizWithChapter(id, title);
+      }
+    }
   }
 
   Future<void> _onChapterTap(BuildContext context, Map<String, dynamic> chapter) async {
@@ -175,14 +217,34 @@ class _HomePageState extends State<HomePage> {
     final type = chapter['type'] as String?;
     final title = _t(chapter['title'] as String);
 
-    if (id >= 4) {
-      final isVipNow = await _fetchVipStatus();
-      if (!mounted) return;
-      setState(() => _isVip = isVipNow);
-      if (!isVipNow) {
-        _showPurchaseDialog(context);
+    // 章节序号 <= 3：允许游客直接进入
+    if (id <= 3) {
+      if (type == 'simulation') {
+        _openSimulationExam();
         return;
       }
+      if (type == 'hardest') {
+        _openQuizWithChapter(id, title);
+        return;
+      }
+      _openQuizWithChapter(id, title);
+      return;
+    }
+
+    // 章节序号 > 3：需登录 + VIP
+    if (supabase.auth.currentUser == null) {
+      context.read<UserManager>().setPendingChapter(chapter);
+      if (!context.mounted) return;
+      context.router.push(const AuthRoute());
+      return;
+    }
+
+    final isVipNow = await _fetchVipStatus();
+    if (!mounted) return;
+    setState(() => _isVip = isVipNow);
+    if (!isVipNow) {
+      _showPurchaseDialog(context, pendingChapter: chapter);
+      return;
     }
 
     if (type == 'simulation') {

@@ -49,4 +49,12 @@ class MistakesPreference {
     final ids = await loadMistakeIds();
     return ids.length;
   }
+
+  /// 退出登录时清空本地错题缓存
+  static Future<void> clear() async {
+    try {
+      final prefs = await _instance;
+      await prefs.remove(_kMistakeIds);
+    } catch (_) {}
+  }
 }

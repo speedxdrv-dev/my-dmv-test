@@ -38,7 +38,8 @@ class _IntroPageState extends State<IntroPage> {
   void _onStart(BuildContext context) async {
     await IntroPreference.saveIntroSeen(true);
     if (!context.mounted) return;
-    // 取消强制登录，直接进入答题目录页
+    // 1-3 章免费开放：点击「开始我的通关之旅」直接进入答题目录，无需登录
+    // 只有点击第四章及以后才触发登录流程
     appRouter.replaceAll([const HomeRoute(), const HomePageRoute()]);
   }
 

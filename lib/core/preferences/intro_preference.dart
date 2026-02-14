@@ -40,4 +40,15 @@ class IntroPreference {
       await prefs.setBool(_kIntroSeen, value);
     } catch (_) {}
   }
+
+  /// 退出登录时重置，下次启动视为未注册用户
+  static Future<void> clear() async {
+    if (kIsWeb) {
+      _webIntroSeenThisLoad = false;
+    }
+    try {
+      final prefs = await _instance;
+      await prefs.remove(_kIntroSeen);
+    } catch (_) {}
+  }
 }

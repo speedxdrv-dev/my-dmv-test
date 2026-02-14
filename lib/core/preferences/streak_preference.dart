@@ -68,4 +68,13 @@ class StreakPreference {
       return 1;
     }
   }
+
+  /// 退出登录时清空打卡记录
+  static Future<void> clear() async {
+    try {
+      final prefs = await _instance;
+      await prefs.remove(_kLastLoginDate);
+      await prefs.remove(_kStreakCount);
+    } catch (_) {}
+  }
 }

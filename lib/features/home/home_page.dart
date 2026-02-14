@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/config/router/app_router.dart';
+import '../../../../core/services/logout_service.dart';
 import '../../../../core/user/user_manager.dart';
 import '../../../../core/utils/resources/supabase.dart';
 import '../../widgets/payment_dialog.dart';
@@ -217,7 +218,7 @@ class _HomePageState extends State<HomePage> {
     final type = chapter['type'] as String?;
     final title = _t(chapter['title'] as String);
 
-    // 章节序号 <= 3：允许游客直接进入
+    // 1-3 章：免费对所有客户开放，游客可直接进入
     if (id <= 3) {
       if (type == 'simulation') {
         _openSimulationExam();
@@ -231,7 +232,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    // 章节序号 > 3：需登录 + VIP
+    // 第四章及以后：新用户点击时 → 登录页 → 验证码通过 → 收费窗口 → 缴费验证 → 开放全部章节
     if (supabase.auth.currentUser == null) {
       context.read<UserManager>().setPendingChapter(chapter);
       if (!context.mounted) return;
@@ -477,8 +478,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           TextButton.icon(
             onPressed: () async {
-              context.read<UserManager>().clear();
-              await supabase.auth.signOut();
+              await LogoutService.performLogout();
               if (!context.mounted) return;
               appRouter.replaceAll([const HomeRoute(), const IntroRoute()]);
             },

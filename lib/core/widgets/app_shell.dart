@@ -64,6 +64,7 @@ class _AppShellState extends State<AppShell> {
     } else {
       // 退出登录后进入介绍页，用户点击「开始我的通关之旅」进入答题目录
       // 只有点击第四章及以后才跳转登录页
+      // 本地缓存已在 LogoutService.performLogout() 中清除
       context.read<UserManager>().clear();
       appRouter.replaceAll([const HomeRoute(), const IntroRoute()]);
     }

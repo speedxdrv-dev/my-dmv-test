@@ -14,10 +14,12 @@ class PaymentDialog extends StatefulWidget {
     super.key,
     required this.isTraditional,
     required this.onRedeemed,
+    this.onOpenPaymentGuide,
   });
 
   final bool isTraditional;
   final Future<void> Function() onRedeemed;
+  final VoidCallback? onOpenPaymentGuide;
 
   @override
   State<PaymentDialog> createState() => _PaymentDialogState();
@@ -424,7 +426,9 @@ class _PaymentDialogState extends State<PaymentDialog>
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: _togglePaymentArea,
+                                  onTap: widget.onOpenPaymentGuide != null
+                                      ? () => widget.onOpenPaymentGuide!()
+                                      : _togglePaymentArea,
                                   borderRadius: BorderRadius.circular(16),
                                   child: Center(
                                     child: Row(

@@ -8,6 +8,7 @@ import '../../../../core/services/logout_service.dart';
 import '../../../../core/user/user_manager.dart';
 import '../../../../core/utils/resources/supabase.dart';
 import '../../widgets/payment_dialog.dart';
+import '../../widgets/payment_guide_page.dart';
 import 'dart:async';
 
 import '../../../../core/preferences/chinese_preference.dart';
@@ -171,6 +172,15 @@ class _HomePageState extends State<HomePage> {
       barrierDismissible: false,
       builder: (ctx) => PaymentDialog(
         isTraditional: isTraditional,
+        onOpenPaymentGuide: () {
+          final nav = Navigator.of(ctx);
+          nav.pop();
+          nav.push(MaterialPageRoute(
+            builder: (_) => PaymentGuidePage(
+              isTraditional: isTraditional,
+            ),
+          ));
+        },
         onRedeemed: () async {
           await _checkVipStatus();
           if (context.mounted) Navigator.of(context).pop();

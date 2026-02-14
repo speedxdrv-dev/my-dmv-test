@@ -57,6 +57,7 @@ class _AppShellState extends State<AppShell> {
     if (event == AuthChangeEvent.signedIn) {
       final user = supabase.auth.currentUser;
       if (user != null) {
+        context.read<UserManager>().clearForceLogin();
         await context.read<UserManager>().loadVipStatus(user.id);
       }
       if (!mounted) return;

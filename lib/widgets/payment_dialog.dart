@@ -280,12 +280,17 @@ class _PaymentDialogState extends State<PaymentDialog>
                       gradient: _brandGradient,
                     ),
                     child: Center(
-                      child: Text(
-                        _t('ZyLand'),
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 2,
+                      child: Image.asset(
+                        'assets/logo.png',
+                        height: 64,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Text(
+                          _t('ZyLand'),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 2,
+                          ),
                         ),
                       ),
                     ),
@@ -298,7 +303,7 @@ class _PaymentDialogState extends State<PaymentDialog>
                       children: [
                         // 主标题
                         Text(
-                          _t('解锁 ZyLand 2026 全能包'),
+                          _t('解锁 ZyLand 驾考通全能包'),
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.onSurface,

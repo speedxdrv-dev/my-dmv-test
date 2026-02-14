@@ -61,10 +61,10 @@
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   <script>
-    // 1. 在引擎启动前，强制设置全局渲染标志
-    window.flutterWebRenderer = "html";
+    // 注意：不能同时使用 window.flutterWebRenderer 和 initializeEngine({renderer})，否则会报错
+    // 仅通过 initializeEngine 的 renderer 配置即可
 
-    // 2. 移除可能导致冲突的 Service Worker
+    // 移除可能导致冲突的 Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
         for (var reg of regs) reg.unregister();

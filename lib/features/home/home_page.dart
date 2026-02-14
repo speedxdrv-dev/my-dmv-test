@@ -166,6 +166,8 @@ class _HomePageState extends State<HomePage> {
     final isTraditional = _isTraditional;
     showDialog<void>(
       context: context,
+      useRootNavigator: true,
+      barrierDismissible: false,
       builder: (ctx) => PaymentDialog(
         isTraditional: isTraditional,
         onRedeemed: () async {
@@ -201,7 +203,12 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
     setState(() => _isVip = isVipNow);
     if (!isVipNow) {
-      _showPurchaseDialog(context, pendingChapter: pending);
+      // 登录回跳后延后两帧弹出，确保路由过渡完成、overlay 已就绪
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showPurchaseDialog(this.context, pendingChapter: pending);
+        });
+      });
     } else {
       if (type == 'simulation') {
         _openSimulationExam();
@@ -233,18 +240,22 @@ class _HomePageState extends State<HomePage> {
     }
 
     // 第四章及以后：新用户点击时 → 登录页 → 验证码通过 → 收费窗口 → 缴费验证 → 开放全部章节
-    if (supabase.auth.currentUser == null) {
-      context.read<UserManager>().setPendingChapter(chapter);
+    // 使用 forceLogin 兜底：Supabase session 可能未及时清除，登出后强制先跳登录页
+    final userManager = context.read<UserManager>();
+    final needLogin = supabase.auth.currentUser == null || userManager.forceLogin;
+    if (needLogin) {
+      userManager.setPendingChapter(chapter);
       if (!context.mounted) return;
-      context.router.push(const AuthRoute());
+      appRouter.replaceAll([const HomeRoute(), const AuthRoute()]);
       return;
     }
 
+    // 已登录但非 VIP → 自动弹出收费窗口
     final isVipNow = await _fetchVipStatus();
     if (!mounted) return;
     setState(() => _isVip = isVipNow);
     if (!isVipNow) {
-      _showPurchaseDialog(context, pendingChapter: chapter);
+      _showPurchaseDialog(this.context, pendingChapter: chapter);
       return;
     }
 
@@ -637,11 +648,8 @@ class _HomePageState extends State<HomePage> {
                               mistakesLoading: false,
                               isTraditional: _isTraditional,
                               onTap: () {
-                                if (isUnlocked) {
-                                  _onChapterTap(context, chapter);
-                                } else {
-                                  _showPurchaseDialog(context);
-                                }
+                                // 统一走 _onChapterTap：未登录会先跳登录页，已登录非 VIP 才弹收费窗口
+                                _onChapterTap(context, chapter);
                               },
                             );
                           },

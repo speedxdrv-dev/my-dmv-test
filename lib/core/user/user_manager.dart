@@ -16,6 +16,20 @@ class UserManager extends ChangeNotifier {
 
   bool? get isVip => _isVip;
 
+  /// 退出登录后置为 true，确保点击第四章时先跳登录页（解决 Supabase session 可能未及时清除的问题）
+  bool _forceLogin = false;
+  bool get forceLogin => _forceLogin;
+
+  void markForceLogin() {
+    _forceLogin = true;
+    notifyListeners();
+  }
+
+  void clearForceLogin() {
+    _forceLogin = false;
+    notifyListeners();
+  }
+
   /// 登录回跳后待访问的章节（从章节点击跳转登录时设置）
   Map<String, dynamic>? _pendingChapter;
 
@@ -61,6 +75,7 @@ class UserManager extends ChangeNotifier {
   void clear() {
     _isVip = null;
     _pendingChapter = null;
+    _forceLogin = true; // 登出后强制先跳登录页
     notifyListeners();
   }
 }

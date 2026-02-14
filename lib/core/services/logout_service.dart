@@ -12,20 +12,20 @@ class LogoutService {
 
   /// 执行完整登出：清除内存状态、本地缓存、Supabase 会话
   static Future<void> performLogout() async {
-    // 1. 清除内存中的用户状态（VIP、待访问章节）
+    // 1. 优先登出 Supabase，确保 currentUser 立即为 null，后续点击第四章会先跳登录页
+    await supabase.auth.signOut();
+
+    // 2. 清除内存中的用户状态（VIP、待访问章节）
     UserManager().clear();
 
-    // 2. 清除本地 SharedPreferences 中的用户相关缓存
+    // 3. 清除本地 SharedPreferences 中的用户相关缓存
     await MistakesPreference.clear();
     await StreakPreference.clear();
     await IntroPreference.clear();
 
-    // 3. 清除图片缓存（题目图片等）
+    // 4. 清除图片缓存（题目图片等）
     try {
       await DefaultCacheManager().emptyCache();
     } catch (_) {}
-
-    // 4. 登出 Supabase（会清除持久化的 session）
-    await supabase.auth.signOut();
   }
 }

@@ -479,8 +479,7 @@ class _HomePageState extends State<HomePage> {
           TextButton.icon(
             onPressed: () async {
               await LogoutService.performLogout();
-              if (!context.mounted) return;
-              appRouter.replaceAll([const HomeRoute(), const IntroRoute()]);
+              // 不在此处 replaceAll，由 app_shell 监听 signOut 后统一跳转，确保 auth 状态已清除
             },
             icon: const Icon(Icons.logout_rounded, size: 20, color: Colors.red),
             label: Text(_t('退出登录'), style: const TextStyle(color: Colors.red, fontSize: 14)),

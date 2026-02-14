@@ -475,16 +475,15 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            tooltip: _t('退出登录'),
-            color: Colors.red,
+          TextButton.icon(
             onPressed: () async {
               context.read<UserManager>().clear();
               await supabase.auth.signOut();
               if (!context.mounted) return;
               appRouter.replaceAll([const HomeRoute(), const IntroRoute()]);
             },
+            icon: const Icon(Icons.logout_rounded, size: 20, color: Colors.red),
+            label: Text(_t('退出登录'), style: const TextStyle(color: Colors.red, fontSize: 14)),
           ),
           IconButton(
             icon: const Icon(Icons.info_outline),

@@ -1,17 +1,14 @@
 //force update 123
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/router/app_router.dart';
 import 'core/config/supabase/setup.dart';
 import 'core/preferences/intro_preference.dart';
-import 'core/config/supabase/supabase_config.dart';
 import 'core/config/themes/app_theme.dart';
 import 'core/user/user_manager.dart';
 import 'core/utils/resources/supabase.dart';

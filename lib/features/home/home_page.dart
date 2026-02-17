@@ -221,7 +221,7 @@ class _HomePageState extends State<HomePage> {
 
     if (!isVipNow) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _showPurchaseDialog(this.context, pendingChapter: pending);
+        if (mounted) _showPurchaseDialog(context, pendingChapter: pending);
       });
     } else {
       if (type == 'simulation') {

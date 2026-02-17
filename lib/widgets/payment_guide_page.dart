@@ -98,10 +98,10 @@ class _PaymentGuidePageState extends State<PaymentGuidePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 8),
-              Center(
+              const Center(
                 child: Text(
                   '👑',
-                  style: const TextStyle(fontSize: 48),
+                  style: TextStyle(fontSize: 48),
                 ),
               ),
               const SizedBox(height: 16),
@@ -157,7 +157,7 @@ class _PaymentGuidePageState extends State<PaymentGuidePage> {
                 width: 40,
                 height: 40,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Icon(Icons.account_balance_wallet, size: 40, color: const Color(0xFF6D1ED4)),
+                errorBuilder: (_, __, ___) => const Icon(Icons.account_balance_wallet, size: 40, color: Color(0xFF6D1ED4)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -228,7 +228,7 @@ class _PaymentGuidePageState extends State<PaymentGuidePage> {
                   width: 40,
                   height: 40,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Icon(Icons.chat_bubble, size: 40, color: const Color(0xFF07C160)),
+                  errorBuilder: (_, __, ___) => const Icon(Icons.chat_bubble, size: 40, color: Color(0xFF07C160)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

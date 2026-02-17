@@ -207,10 +207,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     if (_versionTapCount >= 5) {
                       _versionTapCount = 0;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('身份验证成功，欢迎 Boss！'),
+                        const SnackBar(
+                          content: Text('身份验证成功，欢迎 Boss！'),
                           backgroundColor: Colors.green,
-                          duration: const Duration(milliseconds: 500),
+                          duration: Duration(milliseconds: 500),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );

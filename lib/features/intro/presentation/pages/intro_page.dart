@@ -74,9 +74,9 @@ class _IntroPageState extends State<IntroPage> {
                     Theme(
                       data: ThemeData(
                         switchTheme: SwitchThemeData(
-                          thumbColor: MaterialStateProperty.all(Colors.white),
-                          trackColor: MaterialStateProperty.resolveWith((states) {
-                            if (states.contains(MaterialState.selected)) {
+                          thumbColor: WidgetStateProperty.all(Colors.white),
+                          trackColor: WidgetStateProperty.resolveWith((states) {
+                            if (states.contains(WidgetState.selected)) {
                               return Colors.white54;
                             }
                             return Colors.white24;

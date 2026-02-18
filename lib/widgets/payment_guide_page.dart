@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../core/utils/chinese_converter.dart';
 import '../core/utils/extensions/snack_bar_extension.dart';
+import 'manual_sms_verification_widget.dart';
 
 /// 支付引导页：简洁专业，Zelle / 微信支付
 class PaymentGuidePage extends StatefulWidget {
@@ -25,6 +26,8 @@ class _PaymentGuidePageState extends State<PaymentGuidePage> {
   static const String _wechatPayQr = 'assets/wechat.qr.png';
 
   bool _wechatExpanded = false;
+  bool _isVerified = false;
+  bool _showVerification = false;
 
   String _t(String s) => convertChinese(s, widget.isTraditional);
 
@@ -115,11 +118,23 @@ class _PaymentGuidePageState extends State<PaymentGuidePage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              _buildZelleModule(theme, colorScheme),
-              const SizedBox(height: 20),
-              _buildWechatModule(theme, colorScheme),
-              const SizedBox(height: 32),
-              _buildPrimaryButton(theme, colorScheme),
+              if (_showVerification) ...[
+                ManualSmsVerificationWidget(
+                  onVerified: () {
+                    if (mounted) {
+                      setState(() => _isVerified = true);
+                      Navigator.of(context).pop();
+                      widget.onPaidContact?.call(); // 触发解锁回调
+                    }
+                  },
+                ),
+              ] else ...[
+                _buildZelleModule(theme, colorScheme),
+                const SizedBox(height: 20),
+                _buildWechatModule(theme, colorScheme),
+                const SizedBox(height: 32),
+                _buildPrimaryButton(theme, colorScheme),
+              ],
               const SizedBox(height: 12),
               _buildSecondaryButton(colorScheme),
               const SizedBox(height: 32),
@@ -274,8 +289,9 @@ class _PaymentGuidePageState extends State<PaymentGuidePage> {
       height: 52,
       child: FilledButton(
         onPressed: () {
-          widget.onPaidContact?.call();
-          _showWechatQr();
+          setState(() {
+            _showVerification = true;
+          });
         },
         style: FilledButton.styleFrom(
           backgroundColor: const Color(0xFFD4A017),

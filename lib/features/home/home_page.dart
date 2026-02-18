@@ -1,11 +1,14 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/foundation.dart'; // Added for kDebugMode
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Added for Clipboard
 import 'package:provider/provider.dart';
 
 import '../../../../core/config/router/app_router.dart';
 import '../auth/presentation/pages/auth_page.dart';
 import '../../../../core/services/logout_service.dart';
 import '../../../../core/user/user_manager.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/utils/resources/supabase.dart';
 import '../../widgets/payment_dialog.dart';
 import '../../widgets/payment_guide_page.dart';
@@ -73,17 +76,34 @@ class _HomePageState extends State<HomePage> {
     if (mounted) setState(() => _isVip = isVip);
   }
 
+
   Future<bool> _fetchVipStatus() async {
-    final uid = supabase.auth.currentUser?.id;
-    if (uid == null) return false;
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      debugPrint('HomePage: _fetchVipStatus - No user logged in');
+      return false;
+    }
+    
+    // 1. Check Metadata (Fastest, no RLS issue usually)
+    // Check both root level (sometimes flattened) and inside user_metadata
+    final metaIsVip = user.userMetadata?['is_vip'];
+    if (_parseIsVip(metaIsVip)) {
+       debugPrint('HomePage: VIP confirmed via Metadata');
+       return true;
+    }
+
+    // 2. Check Database (Source of Truth)
     try {
       final res = await supabase
           .from('profiles')
           .select('is_vip')
-          .eq('id', uid)
+          .eq('id', user.id)
           .maybeSingle();
-      return _parseIsVip(res?['is_vip']);
-    } catch (_) {
+      final isVip = _parseIsVip(res?['is_vip']);
+      debugPrint('HomePage: _fetchVipStatus for ${user.id} - isVip: $isVip (raw: ${res?['is_vip']})');
+      return isVip;
+    } catch (e) {
+      debugPrint('HomePage: _fetchVipStatus error: $e');
       return false;
     }
   }
@@ -178,24 +198,77 @@ class _HomePageState extends State<HomePage> {
           nav.push(MaterialPageRoute(
             builder: (_) => PaymentGuidePage(
               isTraditional: isTraditional,
+              onPaidContact: () async {
+                 // PaymentGuidePage 验证成功后回调此处
+                 // 此时用户已通过短信验证，后端 is_vip 应为 true
+                 // 我们进行强制刷新和双重检查，然后解锁章节
+                 
+                 // 尝试多次检查，防止网络延迟或状态同步问题
+                 bool isVipNow = false;
+                 // 先强制刷新一次 session，确保 token 是最新的（虽然 ManualSmsVerificationWidget 已做，但双重保险）
+                 try {
+                   await supabase.auth.refreshSession();
+                 } catch (_) {}
+
+                 for (int i = 0; i < 5; i++) {
+                    // 传入 refresh: true (需修改 _checkVipStatus 支持或直接在此调用)
+                    // 这里我们直接调用底层的 fetch 并强制 setState
+                    isVipNow = await _fetchVipStatus();
+                    if (mounted) setState(() => _isVip = isVipNow);
+                    
+                    if (isVipNow) break;
+                    await Future.delayed(const Duration(milliseconds: 1000)); // 等待 1 秒重试
+                 }
+                 
+                 if (mounted && isVipNow) {
+                      if (pendingChapter != null && mounted) {
+                        final id = pendingChapter['id'] as int;
+                        final type = pendingChapter['type'] as String?;
+                        final title = _t(pendingChapter['title'] as String);
+                        if (type == 'simulation') {
+                          _openSimulationExam();
+                        } else if (type == 'hardest') {
+                          _openQuizWithChapter(id, title);
+                        } else {
+                          _openQuizWithChapter(id, title);
+                        }
+                      }
+                 } else if (mounted) {
+                    // 如果还是失败，可能存在延迟，提示用户并尝试最后一次
+                     await _fetchVipStatus().then((v) {
+                        if (mounted && v) setState(() => _isVip = true);
+                     });
+                 }
+              },
             ),
           ));
         },
         onRedeemed: () async {
+          // 支付验证逻辑已移至 ManualSmsVerificationWidget，
+          // 这里我们只需要等待 PaymentGuidePage 返回的结果。
+          // 当 PaymentGuidePage 返回时，如果 _isVerified 为 true，说明已经验证成功
+          // 并且 PaymentGuidePage 内部已经调用了 onPaidContact。
+          
+          // 为了保险起见，这里再做一次 VIP 检查
           await _checkVipStatus();
-          if (context.mounted) Navigator.of(context).pop();
-          // 交费验证成功后，立即更新 VIP 并开启对应章节
-          if (pendingChapter != null && mounted) {
-            final id = pendingChapter['id'] as int;
-            final type = pendingChapter['type'] as String?;
-            final title = _t(pendingChapter['title'] as String);
-            if (type == 'simulation') {
-              _openSimulationExam();
-            } else if (type == 'hardest') {
-              _openQuizWithChapter(id, title);
-            } else {
-              _openQuizWithChapter(id, title);
-            }
+          if (context.mounted) {
+             // 检查是否已经解锁，如果是，关闭弹窗并进入章节
+             final isVipNow = await _fetchVipStatus();
+             if (isVipNow) {
+                Navigator.of(context).pop();
+                if (pendingChapter != null && mounted) {
+                  final id = pendingChapter['id'] as int;
+                  final type = pendingChapter['type'] as String?;
+                  final title = _t(pendingChapter['title'] as String);
+                  if (type == 'simulation') {
+                    _openSimulationExam();
+                  } else if (type == 'hardest') {
+                    _openQuizWithChapter(id, title);
+                  } else {
+                    _openQuizWithChapter(id, title);
+                  }
+                }
+             }
           }
         },
       ),
@@ -205,32 +278,45 @@ class _HomePageState extends State<HomePage> {
   /// 登录回跳后检查 VIP 并弹出收费窗口（从章节点击跳转登录时设置）
   Future<void> _checkVipAndShowPaywall() async {
     final userManager = context.read<UserManager>();
-    final pending = userManager.consumePendingChapter();
+    final pending = userManager.pendingChapter;
     if (pending == null || !mounted) return;
-    final id = pending['id'] as int;
-    final type = pending['type'] as String?;
-    final title = _t(pending['title'] as String);
-
-    // 刷新用户状态，确保 App 知道用户刚登录完
+    
+    // 强制刷新 VIP 状态
     await _refreshUserStatus();
-    if (!mounted) return;
+    
+    // 再次确认，带重试机制
+    bool isVipNow = false;
+    for (int i = 0; i < 3; i++) {
+       // 每次尝试前先刷新 session，以防 token 过期或未同步
+       if (i > 0) {
+          try { await supabase.auth.refreshSession(); } catch (_) {}
+       }
+       isVipNow = await _fetchVipStatus();
+       if (mounted) setState(() => _isVip = isVipNow);
+       if (isVipNow) break;
+       await Future.delayed(const Duration(milliseconds: 500));
+    }
 
-    final isVipNow = await _fetchVipStatus();
-    if (!mounted) return;
-    setState(() => _isVip = isVipNow);
-
-    if (!isVipNow) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _showPurchaseDialog(context, pendingChapter: pending);
-      });
+    if (isVipNow) {
+       // 已解锁，清除 pending，直接打开
+       userManager.consumePendingChapter();
+       final id = pending['id'] as int;
+       final type = pending['type'] as String?;
+       final title = _t(pending['title'] as String);
+       if (type == 'simulation') {
+          _openSimulationExam();
+       } else if (type == 'hardest') {
+          _openQuizWithChapter(id, title);
+       } else {
+          _openQuizWithChapter(id, title);
+       }
     } else {
-      if (type == 'simulation') {
-        _openSimulationExam();
-      } else if (type == 'hardest') {
-        _openQuizWithChapter(id, title);
-      } else {
-        _openQuizWithChapter(id, title);
-      }
+       // 未解锁，弹出支付窗口
+       if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+             _showPurchaseDialog(context, pendingChapter: pending);
+          });
+       }
     }
   }
 
@@ -280,23 +366,24 @@ class _HomePageState extends State<HomePage> {
     }
 
     // 已登录但非 VIP → 自动弹出收费窗口
-    final isVipNow = await _fetchVipStatus();
-    if (!mounted) return;
-    setState(() => _isVip = isVipNow);
-    if (!isVipNow) {
-      _showPurchaseDialog(this.context, pendingChapter: chapter);
-      return;
+    // 这里增加一个 checkVipStatus 确保是最新的状态
+    await _checkVipStatus();
+    if (_isVip) {
+       // 如果已经是 VIP，直接打开
+       if (type == 'simulation') {
+          _openSimulationExam();
+       } else if (type == 'hardest') {
+          _openQuizWithChapter(id, title);
+       } else {
+          _openQuizWithChapter(id, title);
+       }
+       return;
     }
-
-    if (type == 'simulation') {
-      _openSimulationExam();
-      return;
+    
+    // 弹出购买窗口
+    if (mounted) {
+       _showPurchaseDialog(context, pendingChapter: chapter);
     }
-    if (type == 'hardest') {
-      _openQuizWithChapter(id, title);
-      return;
-    }
-    _openQuizWithChapter(id, title);
   }
 
   /// 驾考章节配置（与 Supabase chapters 表对应，按 ID 排序）
@@ -557,6 +644,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      floatingActionButton: null,
       body: Column(
         children: [
           const _SocialProofMarquee(),

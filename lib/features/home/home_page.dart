@@ -1,14 +1,13 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart'; // Added for kDebugMode
+// Added for kDebugMode
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Added for Clipboard
+// Added for Clipboard
 import 'package:provider/provider.dart';
 
 import '../../../../core/config/router/app_router.dart';
 import '../auth/presentation/pages/auth_page.dart';
 import '../../../../core/services/logout_service.dart';
 import '../../../../core/user/user_manager.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/utils/resources/supabase.dart';
 import '../../widgets/payment_dialog.dart';
 import '../../widgets/payment_guide_page.dart';

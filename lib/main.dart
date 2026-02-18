@@ -99,6 +99,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp.router(
         title: 'Zyland驾考通',
+        debugShowCheckedModeBanner: false, // 移除右上角的 DEBUG 标签
         theme: AppTheme.lightTheme,
         // darkTheme: AppTheme.darkTheme,
         routerConfig: appRouter.config(),

@@ -59,10 +59,11 @@ class _IntroPageState extends State<IntroPage> {
             children: [
               const SizedBox(height: 16),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.only(right: 20, top: 10), // Added top padding
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    Expanded(child: Container()), // Spacer to push switch to right
                     Text(
                       _t('简'),
                       style: TextStyle(
@@ -99,23 +100,21 @@ class _IntroPageState extends State<IntroPage> {
                   ],
                 ),
               ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.directions_car_filled,
-                        size: 52,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center, // Vertically center content
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          const Icon(
+                            Icons.directions_car_filled,
+                            size: 52,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 16),
                           Text(
                             _t('2026 加州驾照\n笔试通关神器'),
                             textAlign: TextAlign.center,
@@ -154,11 +153,10 @@ class _IntroPageState extends State<IntroPage> {
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
               Expanded(
                 child: Container(
                   width: double.infinity,
